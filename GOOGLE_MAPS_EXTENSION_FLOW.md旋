@@ -1,0 +1,65 @@
+# 🗺️ Google Maps + Chrome Extension Workflow
+
+This workflow represents a **Hybrid Method** for lead generation. Instead of using a paid direct API (like Outscraper), you use a Chrome Extension to manually find leads on Google Maps and then import them into your CRM for AI processing.
+
+## 📊 Workflow Flowchart
+
+```mermaid
+graph TD
+    %% Step 1: Manual Discovery
+    Start((Start)) --> Search[Search Niche on Google Maps<br/>'e.g. Software Company in Noida']
+    Search --> Scroll[Scroll through results<br/>to load data]
+    
+    %% Step 2: Extraction
+    Scroll --> Extension[Launch Chrome Extension<br/>'e.g. Instant Data Scraper']
+    Extension --> Export[Export Data to CSV/Excel]
+    
+    %% Step 3: Integration
+    Export --> Import[Upload CSV to CRM<br/>'Leads > Import' Button]
+    Import --> Parse[CRM Logic Parses CSV<br/>Matches columns like Name, Phone, Site]
+    
+    %% Step 4: CRM Enrichment (The Real Work)
+    Parse --> DB[(PostgreSQL Database)]
+    DB --> LinkFinder[CRM Searches LinkedIn<br/>Finds CEO/Founder via Search Index]
+    LinkFinder --> AIEngine[AI Personalization<br/>Generates customized msg per CEO]
+    
+    %% Step 5: Outreach
+    AIEngine --> Send[Send Outreach<br/>via LinkedIn or Email]
+    Send --> FollowUp[Automated Follow-up Worker]
+    FollowUp --> Close((Deal Closed))
+
+    %% Styling
+    style Start fill:#f9f,stroke:#333
+    style Close fill:#00ff00,stroke:#333
+    style Extension fill:#f96,stroke:#333
+    style AIEngine fill:#4f46e5,stroke:#fff
+```
+
+---
+
+## 🛠️ Recommended Chrome Extensions
+To use this workflow, you need one of these "Scraper" extensions:
+1. **Instant Data Scraper** (Free/Easy): Automatically detects lists on any web page including Maps.
+2. **Outscraper Google Maps Extension**: Specialized for maps; more accurate but might have limits.
+3. **Web Scraper (webscraper.io)**: More advanced; requires setting up a "Sitemap".
+
+---
+
+## 🚀 Why use this instead of the API?
+
+| Feature | Chrome Extension Method | Direct API Method (Current) |
+| :--- | :--- | :--- |
+| **Cost** | **FREE** (mostly) | Requires API credits |
+| **Speed** | Manual (1-2 mins per batch) | Instant (seconds) |
+| **Quality** | High (You verify visually) | Raw (Requires filtering) |
+| **Scaling** | Harder to automate fully | Perfectly automated |
+
+---
+
+## 📝 Next Steps for Implementation
+To make this work in your CRM, we will add an **"Import CSV"** button in the **Leads** section. When you upload your file:
+1. It will map your CSV headers (e.g., `Title` -> `name`, `Website` -> `website`).
+2. It will save them directly to your **PostgreSQL** database.
+3. It will immediately trigger the **AI Enrichment** for those leads.
+
+Would you like me to add this **CSV Import** feature to your Leads page now?
