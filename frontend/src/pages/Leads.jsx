@@ -18,6 +18,8 @@ const STATUS_CONFIG = {
   Lost: { label: 'Lost', color: 'bg-red-100 text-red-600' },
 };
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Leads = () => {
   const [leads, setLeads] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,7 +48,7 @@ const Leads = () => {
 
   const fetchContacts = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/linkedin');
+      const response = await fetch(`${API_BASE_URL}/api/linkedin');
       if (response.ok) {
         const data = await response.json();
         const grouped = data.reduce((acc, contact) => {
@@ -65,7 +67,7 @@ const Leads = () => {
   const fetchLeads = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('http://localhost:5000/api/leads');
+      const response = await fetch(`${API_BASE_URL}/api/leads');
       if (response.ok) {
         const data = await response.json();
         setLeads(data);
@@ -78,7 +80,7 @@ const Leads = () => {
   const handleDiscovery = async (leadId) => {
     try {
       setDiscoveryStatus({ ...discoveryStatus, [leadId]: 'loading' });
-      const response = await fetch('http://localhost:5000/api/linkedin/find', {
+      const response = await fetch(`${API_BASE_URL}/api/linkedin/find', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ leadId }),
       });
@@ -97,7 +99,7 @@ const Leads = () => {
     try {
       setAiLoading({ ...aiLoading, [contact.id]: true });
       setActiveContact(contact);
-      const response = await fetch('http://localhost:5000/api/ai/generate', {
+      const response = await fetch(`${API_BASE_URL}/api/ai/generate', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contactId: contact.id }),
       });
@@ -116,7 +118,7 @@ const Leads = () => {
     try {
       setIsRegenerating(true);
       setActiveMessage(prev => ({ ...prev, text: null }));
-      const response = await fetch('http://localhost:5000/api/ai/generate', {
+      const response = await fetch(`${API_BASE_URL}/api/ai/generate', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contactId: activeContact.id }),
       });
@@ -134,7 +136,7 @@ const Leads = () => {
     if (!activeMessage) return;
     try {
       setSendLoading(true);
-      const response = await fetch('http://localhost:5000/api/outreach/send', {
+      const response = await fetch(`${API_BASE_URL}/api/outreach/send', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contactId: activeMessage.contactId, messageId: activeMessage.messageId }),
       });
@@ -147,7 +149,7 @@ const Leads = () => {
     if (!mapsQuery) return;
     try {
       setIsSearching(true);
-      const response = await fetch('http://localhost:5000/api/leads/search', {
+      const response = await fetch(`${API_BASE_URL}/api/leads/search', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: mapsQuery, limit: 200 }),
       });
@@ -169,7 +171,7 @@ const Leads = () => {
   const handleAddLead = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/leads', {
+      const response = await fetch(`${API_BASE_URL}/api/leads', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });

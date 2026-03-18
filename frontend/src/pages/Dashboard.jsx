@@ -4,6 +4,8 @@ import { statsData as mockStats } from '../data/mockData';
 import { TrendingUp, Users, Briefcase, Activity, Loader2 } from 'lucide-react';
 import { Badge } from '../components/ui/Badge';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -15,7 +17,7 @@ const Dashboard = () => {
   const fetchStats = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('http://localhost:5000/api/stats');
+      const response = await fetch(`${API_BASE_URL}/api/stats`);
       if (response.ok) {
         const data = await response.json();
         setStats(data);

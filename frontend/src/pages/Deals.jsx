@@ -39,6 +39,8 @@ const STAGE_CONFIG = {
   },
 };
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Deals = () => {
   const stages = ['Prospect', 'Negotiation', 'Won', 'Lost'];
   const [deals, setDeals] = useState([]);
@@ -51,7 +53,7 @@ const Deals = () => {
   const fetchDeals = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('http://localhost:5000/api/deals');
+      const response = await fetch(`${API_BASE_URL}/api/deals`);
       if (response.ok) {
         const data = await response.json();
         setDeals(data);
@@ -65,7 +67,7 @@ const Deals = () => {
 
   const updateDealStage = async (id, newStage) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/deals/${id}/stage`, {
+      const response = await fetch(`${API_BASE_URL}/api/deals/${id}/stage`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stage: newStage }),
