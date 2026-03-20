@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import searchService from './searchService.js';
 
 dotenv.config();
 
@@ -10,44 +11,60 @@ const openai = new OpenAI({
 const linkedinService = {
   findDecisionMakers: async (companyName) => {
     try {
-      console.log(`🧠 [AI ENRICHMENT] Using OpenAI to identify leaders for: ${companyName}`);
+      console.log(`🧠 [AI ENRICHMENT] Searching live Google results for: ${companyName}`);
       
-      if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY.includes('YOUR_OPENAI_API_KEY')) {
-        return [
-          { name: `Founder of ${companyName}`, role: 'CEO', linkedin_url: `https://linkedin.com/search?keywords=CEO+${encodeURIComponent(companyName)}` },
-        ];
+      // 1. Get Live Search Results (Real Data)
+      const searchResults = await searchService.searchLeaders(companyName);
+      let context = `Company: ${companyName}\n`;
+      
+      if (searchResults && searchResults.length > 0) {
+        context += `Google Search Results:\n${searchResults.map((r, i) => 
+          `[${i+1}] Title: ${r.title}\nSnippet: ${r.snippet}\nLink: ${r.link}`
+        ).join('\n\n')}\n\n`;
+      } else {
+        context += "No live search results found. Predict the most likely leaders instead.";
       }
 
-      const prompt = `Based on the company name "${companyName}", predict the most likely names of the CEO/Founder and Head of Sales. 
-      Use local naming conventions for the region if the name suggests one (e.g. India).
-      This is for a CRM simulation, so provide realistic but common professional names for that region.
+      // 2. AI Extraction / Prediction Prompt
+      const prompt = `Task: Identify the real CEO, Founder, or Managing Director of "${companyName}".
       
-      Return ONLY a JSON array:
+      ${context}
+      
+      Return ONLY a JSON array with exactly these fields:
       - name: Full name
-      - role: Job title
-      - email: Predict a professional email (e.g. name@website.com)
-      - linkedin_url: Generate a search URL: https://www.linkedin.com/search/results/people/?keywords={name}%20{companyName}`;
+      - role: Job title (e.g. CEO, Founder)
+      - email: Predicted business email
+      - linkedin_url: The real LinkedIn URL from search (or a search link if not found)`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini", // Mini is often more stable for pure extraction
         messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
+        temperature: 0,
       });
 
-      const content = response.choices[0].message.content;
-      const contacts = JSON.parse(content.replace(/```json|```/g, '').trim());
+      let content = response.choices[0].message.content;
+      
+      // Handle edge cases where AI might wrap in backticks
+      if (content.includes('```')) {
+        content = content.replace(/```json|```/g, '').trim();
+      }
 
-      return contacts.map(c => ({
-        ...c,
-        linkedin_url: c.linkedin_url || `https://linkedin.com/search?keywords=${c.name.replace(/ /g, '+')}+${companyName}`
-      }));
+      const contacts = JSON.parse(content);
+      return contacts;
 
     } catch (error) {
       console.error('LinkedIn AI Enrichment Error:', error.message);
-      // Safety fallback
-      return [
-        { name: `${companyName} Leader`, role: 'CEO', email: `hello@${companyName.toLowerCase().replace(/ /g, '')}.com`, linkedin_url: '#' }
-      ];
+      
+      // Fallback if GPT-4o fails (uses 3.5-turbo)
+      try {
+          const secondResponse = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [{ role: "user", content: `Predict CEO of ${companyName} as JSON array [name, role, email, linkedin_url]` }],
+          });
+          return JSON.parse(secondResponse.choices[0].message.content.replace(/```json|```/g, '').trim());
+      } catch (e) {
+          return [{ name: `${companyName} CEO`, role: 'CEO', email: `ceo@${companyName.toLowerCase().replace(/ /g, '')}.com`, linkedin_url: '#' }];
+      }
     }
   }
 };

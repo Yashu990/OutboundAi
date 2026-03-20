@@ -28,8 +28,8 @@ export const findAndSaveDecisionMakers = async (req, res) => {
 
       if (existing.rows.length === 0) {
         const result = await pool.query(
-          'INSERT INTO contacts (lead_id, name, role, linkedin_url) VALUES ($1, $2, $3, $4) RETURNING *',
-          [leadId, contact.name, contact.role, contact.linkedin_url]
+          'INSERT INTO contacts (lead_id, name, role, email, linkedin_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+          [leadId, contact.name, contact.role, contact.email, contact.linkedin_url]
         );
         savedContacts.push(result.rows[0]);
       }
